@@ -1,0 +1,17 @@
+{
+  "name": "system-diagnostic-scanner",
+  "version": "1.0.0",
+  "description": "Complete system diagnostic scanner for PC, Laptop, Tablet & Mobile",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "system",
+    "diagnostic",
+    "scanner"
+  ],
+  "author": "",
+  "license": "MIT"
+}

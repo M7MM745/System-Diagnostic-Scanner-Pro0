@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlElement">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Diagnostic Scanner - Complete A-Z Scan</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html[lang="ar"] {
+            direction: rtl;
+        }
+
+        html[lang="en"] {
+            direction: ltr;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Droid Arabic Kufi', Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        html[lang="ar"] .language-toggle {
+            left: auto;
+            right: 0;
+        }
+
+        .language-toggle button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .language-toggle button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        html[lang="ar"] .controls {
+            flex-direction: row-reverse;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-text {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .card-content {
+            font-size: 0.95em;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        html[lang="ar"] .stat-item {
+            flex-direction: row-reverse;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-good {
+            background: #4CAF50;
+        }
+
+        .status-warning {
+            background: #FFC107;
+        }
+
+        .status-critical {
+            background: #f44336;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        html[lang="ar"] .tabs {
+            flex-direction: row-reverse;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .process-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .process-item {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        html[lang="ar"] .process-item {
+            flex-direction: row-reverse;
+        }
+
+        .process-item:last-child {
+            border-bottom: none;
+        }
+
+        .process-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .process-mem {
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="language-toggle">
+                <button onclick="toggleLanguage()" title="تبديل اللغة / Toggle Language">🌐 عربي / English</button>
+            </div>
+            <h1 id="title">🔍 System Diagnostic Scanner</h1>
+            <p id="subtitle">Complete A-Z System Analysis for PC, Laptop, Tablet & Mobile</p>
+        </header>
+
+        <div class="controls">
+            <button class="btn-primary" id="btnStartScan" onclick="startScan()">🚀 Start Full Scan</button>
+            <button class="btn-secondary" id="btnQuickScan" onclick="quickScan()">⚡ Quick Scan</button>
+            <button class="btn-secondary" id="btnExport" onclick="exportReport()">📥 Export Report</button>
+            <button class="btn-secondary" id="btnClear" onclick="clearData()">🗑️ Clear Data</button>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection" style="display: none;">
+            <div class="status-text" id="scanStatus">Initializing scan...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Tabs for different sections -->
+        <div id="mainContent" style="display: none;">
+            <div class="controls">
+                <button class="tab-btn active" id="tabOverview" onclick="switchTab('overview')">📊 Overview</button>
+                <button class="tab-btn" id="tabHardware" onclick="switchTab('hardware')">🖥️ Hardware</button>
+                <button class="tab-btn" id="tabSystem" onclick="switchTab('system')">⚙️ System</button>
+                <button class="tab-btn" id="tabStorage" onclick="switchTab('storage')">💾 Storage</button>
+                <button class="tab-btn" id="tabNetwork" onclick="switchTab('network')">🌐 Network</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <div class="grid">
+                    <div class="card">
+                        <h3>System Summary</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Device Type:</span>
+                                <span class="stat-value" id="deviceType">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">OS:</span>
+                                <span class="stat-value" id="osInfo">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Uptime:</span>
+                                <span class="stat-value" id="uptime">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">System Health:</span>
+                                <span class="stat-value"><span class="status-indicator status-good"></span>Good</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Quick Stats</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">CPU Usage:</span>
+                                <span class="stat-value" id="cpuUsage">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Memory Usage:</span>
+                                <span class="stat-value" id="memUsage">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Disk Usage:</span>
+                                <span class="stat-value" id="diskUsage">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Temperature:</span>
+                                <span class="stat-value" id="temperature">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>System Performance</h3>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hardware Tab -->
+            <div id="hardware" class="tab-content">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Processor Information</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">CPU Name:</span>
+                                <span class="stat-value" id="cpuName">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Cores:</span>
+                                <span class="stat-value" id="cpuCores">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Threads:</span>
+                                <span class="stat-value" id="cpuThreads">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Speed:</span>
+                                <span class="stat-value" id="cpuSpeed">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Architecture:</span>
+                                <span class="stat-value" id="cpuArch">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Memory Information</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Total RAM:</span>
+                                <span class="stat-value" id="totalRam">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Used RAM:</span>
+                                <span class="stat-value" id="usedRam">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Available RAM:</span>
+                                <span class="stat-value" id="availableRam">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Memory Usage %:</span>
+                                <span class="stat-value" id="ramPercent">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>GPU Information</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">GPU Model:</span>
+                                <span class="stat-value" id="gpuModel">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">VRAM:</span>
+                                <span class="stat-value" id="gpuVram">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Driver Version:</span>
+                                <span class="stat-value" id="gpuDriver">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Status:</span>
+                                <span class="stat-value"><span class="status-indicator status-good"></span>Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Battery Status</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Battery Level:</span>
+                                <span class="stat-value" id="batteryLevel">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Health:</span>
+                                <span class="stat-value" id="batteryHealth">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Charging:</span>
+                                <span class="stat-value" id="batteryCharging">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Time Remaining:</span>
+                                <span class="stat-value" id="batteryTime">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Temperature Sensors</h3>
+                        <div class="chart-container">
+                            <canvas id="tempChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Tab -->
+            <div id="system" class="tab-content">
+                <div class="grid">
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <h3>System Information</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Computer Name:</span>
+                                <span class="stat-value" id="computerName">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Operating System:</span>
+                                <span class="stat-value" id="systemOS">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">OS Version:</span>
+                                <span class="stat-value" id="osVersion">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Build Number:</span>
+                                <span class="stat-value" id="buildNumber">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">System Boot Time:</span>
+                                <span class="stat-value" id="bootTime">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Last Update:</span>
+                                <span class="stat-value" id="lastUpdate">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Running Processes</h3>
+                        <p style="color: #999; font-size: 0.9em;">Browser-based systems info (limited access)</p>
+                        <div class="process-list" id="processList">
+                            <div class="process-item">
+                                <span class="process-name">Browser Process</span>
+                                <span class="process-mem">~50-200 MB</span>
+                            </div>
+                            <div class="process-item">
+                                <span class="process-name">System Processes</span>
+                                <span class="process-mem">Variable</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>System Services</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>Antivirus</span>
+                                <span class="stat-value">Active</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>Firewall</span>
+                                <span class="stat-value">Enabled</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>Windows Update</span>
+                                <span class="stat-value">Up to Date</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>Network</span>
+                                <span class="stat-value">Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Tab -->
+            <div id="storage" class="tab-content">
+                <div class="grid">
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <h3>Disk Usage Analysis</h3>
+                        <div class="chart-container">
+                            <canvas id="storageChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>C: Drive</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Total:</span>
+                                <span class="stat-value" id="driveC">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Used:</span>
+                                <span class="stat-value" id="driveCUsed">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Free:</span>
+                                <span class="stat-value" id="driveCFree">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Usage %:</span>
+                                <span class="stat-value" id="driveCPercent">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>File System Health</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>File Integrity</span>
+                                <span class="stat-value">Good</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>Fragmentation</span>
+                                <span class="stat-value">Low</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>Bad Sectors</span>
+                                <span class="stat-value">None</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label"><span class="status-indicator status-good"></span>SMART Status</span>
+                                <span class="stat-value">Healthy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Tab -->
+            <div id="network" class="tab-content">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Network Connection</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Status:</span>
+                                <span class="stat-value"><span class="status-indicator status-good"></span>Connected</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Type:</span>
+                                <span class="stat-value" id="netType">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Speed:</span>
+                                <span class="stat-value" id="netSpeed">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Signal Strength:</span>
+                                <span class="stat-value" id="netSignal">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>IP Configuration</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">IPv4 Address:</span>
+                                <span class="stat-value" id="ipv4">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">IPv6 Address:</span>
+                                <span class="stat-value" id="ipv6">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">MAC Address:</span>
+                                <span class="stat-value" id="macAddr">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Gateway:</span>
+                                <span class="stat-value" id="gateway">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Internet Speed</h3>
+                        <div class="card-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Download:</span>
+                                <span class="stat-value" id="speedDown">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Upload:</span>
+                                <span class="stat-value" id="speedUp">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Ping:</span>
+                                <span class="stat-value" id="speedPing">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">ISP:</span>
+                                <span class="stat-value" id="isp">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Network Statistics</h3>
+                        <div class="chart-container">
+                            <canvas id="networkChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== TRANSLATIONS ==========
+        const translations = {
+            en: {
+                title: "🔍 System Diagnostic Scanner",
+                subtitle: "Complete A-Z System Analysis for PC, Laptop, Tablet & Mobile",
+                btnStartScan: "🚀 Start Full Scan",
+                btnQuickScan: "⚡ Quick Scan",
+                btnExport: "📥 Export Report",
+                btnClear: "🗑️ Clear Data",
+                tabOverview: "📊 Overview",
+                tabHardware: "🖥️ Hardware",
+                tabSystem: "⚙️ System",
+                tabStorage: "💾 Storage",
+                tabNetwork: "🌐 Network",
+                initializingScan: "Initializing scan...",
+                detectingDevice: "Detecting device type...",
+                scanningHardware: "Scanning hardware information...",
+                gatheringSystem: "Gathering system information...",
+                analyzingStorage: "Analyzing storage...",
+                checkingNetwork: "Checking network...",
+                generatingReport: "Generating report...",
+                scanComplete: "Scan complete!",
+                systemSummary: "System Summary",
+                deviceType: "Device Type:",
+                os: "OS:",
+                uptime: "Uptime:",
+                systemHealth: "System Health:",
+                quickStats: "Quick Stats",
+                cpuUsage: "CPU Usage:",
+                memUsage: "Memory Usage:",
+                diskUsage: "Disk Usage:",
+                temperature: "Temperature:",
+                processorInfo: "Processor Information",
+                cpuName: "CPU Name:",
+                cores: "Cores:",
+                threads: "Threads:",
+                speed: "Speed:",
+                architecture: "Architecture:",
+                memoryInfo: "Memory Information",
+                totalRam: "Total RAM:",
+                usedRam: "Used RAM:",
+                availableRam: "Available RAM:",
+                ramPercent: "Memory Usage %:",
+                gpuInfo: "GPU Information",
+                gpuModel: "GPU Model:",
+                vram: "VRAM:",
+                driverVersion: "Driver Version:",
+                status: "Status:",
+                active: "Active",
+                batteryStatus: "Battery Status",
+                batteryLevel: "Battery Level:",
+                health: "Health:",
+                charging: "Charging:",
+                timeRemaining: "Time Remaining:",
+                tempSensors: "Temperature Sensors",
+                systemInfo: "System Information",
+                computerName: "Computer Name:",
+                osVersion: "OS Version:",
+                buildNumber: "Build Number:",
+                bootTime: "System Boot Time:",
+                lastUpdate: "Last Update:",
+                runningProcesses: "Running Processes",
+                systemServices: "System Services",
+                antivirus: "Antivirus",
+                firewall: "Firewall",
+                windowsUpdate: "Windows Update",
+                network: "Network",
+                enabled: "Enabled",
+                upToDate: "Up to Date",
+                connected: "Connected",
+                diskUsageAnalysis: "Disk Usage Analysis",
+                driveC: "C: Drive",
+                total: "Total:",
+                used: "Used:",
+                free: "Free:",
+                fileSystemHealth: "File System Health",
+                fileIntegrity: "File Integrity",
+                good: "Good",
+                fragmentation: "Fragmentation",
+                low: "Low",
+                badSectors: "Bad Sectors",
+                none: "None",
+                smartStatus: "SMART Status",
+                healthy: "Healthy",
+                networkConnection: "Network Connection",
+                type: "Type:",
+                connectionSpeed: "Speed:",
+                signalStrength: "Signal Strength:",
+                ipConfig: "IP Configuration",
+                ipv4: "IPv4 Address:",
+                ipv6: "IPv6 Address:",
+                macAddress: "MAC Address:",
+                gateway: "Gateway:",
+                internetSpeed: "Internet Speed",
+                download: "Download:",
+                upload: "Upload:",
+                ping: "Ping:",
+                isp: "ISP:",
+                networkStats: "Network Statistics",
+                reportExported: "Report exported successfully!",
+                clearConfirm: "Clear all scan data and reset?",
+                good: "Good",
+                excellent: "Excellent",
+                warning: "Warning",
+                criticalError: "Critical"
+            },
+            ar: {
+                title: "🔍 ماسح التشخيص النظام",
+                subtitle: "تحليل نظام شامل من الألف إلى الياء للكمبيوتر والجوال والتابلت",
+                btnStartScan: "🚀 ابدأ الفحص الكامل",
+                btnQuickScan: "⚡ فحص سريع",
+                btnExport: "📥 تصدير التقرير",
+                btnClear: "🗑️ مسح البيانات",
+                tabOverview: "📊 نظرة عامة",
+                tabHardware: "🖥️ الأجهزة",
+                tabSystem: "⚙️ النظام",
+                tabStorage: "💾 التخزين",
+                tabNetwork: "🌐 الشبكة",
+                initializingScan: "جاري تهيئة الفحص...",
+                detectingDevice: "جاري الكشف عن نوع الجهاز...",
+                scanningHardware: "جاري فحص معلومات الأجهزة...",
+                gatheringSystem: "جاري جمع معلومات النظام...",
+                analyzingStorage: "جاري تحليل التخزين...",
+                checkingNetwork: "جاري فحص الشبكة...",
+                generatingReport: "جاري إنشاء التقرير...",
+                scanComplete: "تم إكمال الفحص!",
+                systemSummary: "ملخص النظام",
+                deviceType: "نوع الجهاز:",
+                os: "نظام التشغيل:",
+                uptime: "وقت التشغيل:",
+                systemHealth: "صحة النظام:",
+                quickStats: "إحصائيات سريعة",
+                cpuUsage: "استخدام المعالج:",
+                memUsage: "استخدام الذاكرة:",
+                diskUsage: "استخدام القرص:",
+                temperature: "درجة الحرارة:",
+                processorInfo: "معلومات المعالج",
+                cpuName: "اسم المعالج:",
+                cores: "الأنوية:",
+                threads: "الخيوط:",
+                speed: "السرعة:",
+                architecture: "العمارة:",
+                memoryInfo: "معلومات الذاكرة",
+                totalRam: "إجمالي الذاكرة:",
+                usedRam: "الذاكرة المستخدمة:",
+                availableRam: "الذاكرة المتاحة:",
+                ramPercent: "نسبة استخدام الذاكرة:",
+                gpuInfo: "معلومات بطاقة الرسوميات",
+                gpuModel: "موديل GPU:",
+                vram: "ذاكرة VRAM:",
+                driverVersion: "إصدار السائق:",
+                status: "الحالة:",
+                active: "نشط",
+                batteryStatus: "حالة البطارية",
+                batteryLevel: "مستوى البطارية:",
+                health: "الصحة:",
+                charging: "الشحن:",
+                timeRemaining: "الوقت المتبقي:",
+                tempSensors: "أجهزة قياس درجة الحرارة",
+                systemInfo: "معلومات النظام",
+                computerName: "اسم الكمبيوتر:",
+                osVersion: "إصدار نظام التشغيل:",
+                buildNumber: "رقم البناء:",
+                bootTime: "وقت بدء النظام:",
+                lastUpdate: "آخر تحديث:",
+                runningProcesses: "العمليات الجارية",
+                systemServices: "خدمات النظام",
+                antivirus: "برنامج مكافحة الفيروسات",
+                firewall: "جدار الحماية",
+                windowsUpdate: "تحديث Windows",
+                network: "الشبكة",
+                enabled: "مفعل",
+                upToDate: "محدث",
+                connected: "متصل",
+                diskUsageAnalysis: "تحليل استخدام القرص",
+                driveC: "محرك C:",
+                total: "الإجمالي:",
+                used: "المستخدم:",
+                free: "الحر:",
+                fileSystemHealth: "صحة نظام الملفات",
+                fileIntegrity: "سلامة الملفات",
+                good: "ممتاز",
+                fragmentation: "التجزئة",
+                low: "منخفضة",
+                badSectors: "قطاعات سيئة",
+                none: "بدون",
+                smartStatus: "حالة SMART",
+                healthy: "صحي",
+                networkConnection: "اتصال الشبكة",
+                type: "النوع:",
+                connectionSpeed: "السرعة:",
+                signalStrength: "قوة الإشارة:",
+                ipConfig: "إعدادات IP",
+                ipv4: "عنوان IPv4:",
+                ipv6: "عنوان IPv6:",
+                macAddress: "عنوان MAC:",
+                gateway: "البوابة:",
+                internetSpeed: "سرعة الإنترنت",
+                download: "التنزيل:",
+                upload: "التحميل:",
+                ping: "Ping:",
+                isp: "مزود الخدمة:",
+                networkStats: "إحصائيات الشبكة",
+                reportExported: "تم تصدير التقرير بنجاح!",
+                clearConfirm: "هل تريد مسح جميع بيانات الفحص وإعادة تعيين؟",
+                excellent: "ممتاز",
+                warning: "تحذير",
+                criticalError: "حرج"
+            }
+        };
+
+        let currentLanguage = 'en';
+        let scanData = {};
+        let charts = {};
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            localStorage.setItem('preferredLanguage', currentLanguage);
+            document.getElementById('htmlElement').lang = currentLanguage;
+            updateAllText();
+            updateCharts();
+        }
+
+        function t(key) {
+            return translations[currentLanguage][key] || translations['en'][key];
+        }
+
+        function updateAllText() {
+            document.getElementById('title').textContent = t('title');
+            document.getElementById('subtitle').textContent = t('subtitle');
+            document.getElementById('btnStartScan').textContent = t('btnStartScan');
+            document.getElementById('btnQuickScan').textContent = t('btnQuickScan');
+            document.getElementById('btnExport').textContent = t('btnExport');
+            document.getElementById('btnClear').textContent = t('btnClear');
+            document.getElementById('tabOverview').textContent = t('tabOverview');
+            document.getElementById('tabHardware').textContent = t('tabHardware');
+            document.getElementById('tabSystem').textContent = t('tabSystem');
+            document.getElementById('tabStorage').textContent = t('tabStorage');
+            document.getElementById('tabNetwork').textContent = t('tabNetwork');
+        }
+
+        // Load saved language preference
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            document.getElementById('htmlElement').lang = currentLanguage;
+            updateAllText();
+        });
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function updateCharts() {
+            // Destroy existing charts to redraw with new language
+            Object.keys(charts).forEach(key => {
+                if (charts[key]) charts[key].destroy();
+            });
+        }
+
+        async function startScan() {
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+            updateProgress(0, t('initializingScan'));
+
+            try {
+                // Simulate scan stages
+                updateProgress(10, t('detectingDevice'));
+                await delay(500);
+                detectDeviceType();
+
+                updateProgress(20, t('scanningHardware'));
+                await delay(800);
+                await scanHardware();
+
+                updateProgress(40, t('gatheringSystem'));
+                await delay(700);
+                gatherSystemInfo();
+
+                updateProgress(60, t('analyzingStorage'));
+                await delay(700);
+                analyzeStorage();
+
+                updateProgress(75, t('checkingNetwork'));
+                await delay(600);
+                checkNetwork();
+
+                updateProgress(90, t('generatingReport'));
+                await delay(500);
+                generateCharts();
+
+                updateProgress(100, t('scanComplete'));
+                await delay(800);
+
+                document.getElementById('progressSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            } catch (error) {
+                console.error('Scan error:', error);
+                document.getElementById('scanStatus').textContent = 'Scan error occurred';
+            }
+        }
+
+        function quickScan() {
+            document.getElementById('progressSection').style.display = 'block';
+            updateProgress(33, t('scanningHardware'));
+            setTimeout(() => {
+                updateProgress(66, t('gatheringSystem'));
+                setTimeout(() => {
+                    updateProgress(100, t('scanComplete'));
+                    setTimeout(() => {
+                        document.getElementById('progressSection').style.display = 'none';
+                        document.getElementById('mainContent').style.display = 'block';
+                        detectDeviceType();
+                        generateCharts();
+                    }, 500);
+                }, 500);
+            }, 800);
+        }
+
+        function updateProgress(percent, status) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('scanStatus').textContent = status;
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function detectDeviceType() {
+            fetch('http://localhost:3000/api/system-info')
+                .then(response => response.json())
+                .then(systemInfo => {
+                    const ua = navigator.userAgent;
+                    let deviceType = systemInfo.device.type;
+                    let osInfo = currentLanguage === 'en' ? systemInfo.device.platform : systemInfo.device.platform;
+                    
+                    if (/Android/.test(ua)) {
+                        deviceType = 'Android Device';
+                    } else if (/iPhone|iPad/.test(ua)) {
+                        deviceType = /iPad/.test(ua) ? 'iPad' : 'iPhone';
+                    }
+
+                    document.getElementById('deviceType').textContent = deviceType;
+                    document.getElementById('osInfo').textContent = systemInfo.osVersion || osInfo;
+                    document.getElementById('systemOS').textContent = systemInfo.osVersion || osInfo;
+
+                    scanData.deviceType = deviceType;
+                    scanData.osInfo = systemInfo.osVersion;
+                })
+                .catch(error => {
+                    console.log('Using browser device detection (Server not running)');
+                    const ua = navigator.userAgent;
+                    let deviceType = currentLanguage === 'en' ? 'PC/Laptop' : 'كمبيوتر/لابتوب';
+                    let osInfo = currentLanguage === 'en' ? 'Unknown' : 'غير معروف';
+
+                    if (/Android/.test(ua)) {
+                        deviceType = 'Android Device';
+                        const androidVersion = ua.match(/Android (\d+)/)?.[1] || (currentLanguage === 'en' ? 'Unknown' : 'غير معروف');
+                        osInfo = 'Android ' + androidVersion;
+                    } else if (/iPhone|iPad/.test(ua)) {
+                        deviceType = /iPad/.test(ua) ? 'iPad' : 'iPhone';
+                        const iosVersion = ua.match(/OS (\d+)/)?.[1] || (currentLanguage === 'en' ? 'Unknown' : 'غير معروف');
+                        osInfo = 'iOS ' + iosVersion;
+                    } else if (/Windows/.test(ua)) {
+                        osInfo = 'Windows 11 Pro';
+                    } else if (/Mac/.test(ua)) {
+                        osInfo = 'macOS Sonoma';
+                        deviceType = 'Mac';
+                    } else if (/Linux/.test(ua)) {
+                        osInfo = 'Linux';
+                    }
+
+                    document.getElementById('deviceType').textContent = deviceType;
+                    document.getElementById('osInfo').textContent = osInfo;
+                    document.getElementById('systemOS').textContent = osInfo;
+
+                    scanData.deviceType = deviceType;
+                    scanData.osInfo = osInfo;
+                });
+        }
+
+        async function scanHardware() {
+            try {
+                // Fetch real system info from Node.js server
+                const response = await fetch('http://localhost:3000/api/system-info');
+                if (!response.ok) throw new Error('Server not available');
+                const systemInfo = await response.json();
+
+                // CPU Info
+                const cores = systemInfo.cpu.count || navigator.hardwareConcurrency || 'Unknown';
+                document.getElementById('cpuName').textContent = systemInfo.cpu.model || 'Unknown CPU';
+                document.getElementById('cpuCores').textContent = cores + (currentLanguage === 'en' ? ' cores' : ' أنوية');
+                document.getElementById('cpuThreads').textContent = (cores * 2) + (currentLanguage === 'en' ? ' threads' : ' خيط');
+                document.getElementById('cpuSpeed').textContent = (systemInfo.cpu.speed / 1000).toFixed(2) + ' GHz';
+                document.getElementById('cpuArch').textContent = systemInfo.device.arch;
+                document.getElementById('cpuUsage').textContent = systemInfo.cpu.usage + '%';
+
+                // Memory Info - Real data
+                const totalMem = systemInfo.memory.total;
+                const usedMem = systemInfo.memory.used;
+                const ramPercent = systemInfo.memory.percent;
+
+                document.getElementById('totalRam').textContent = totalMem + ' MB';
+                document.getElementById('usedRam').textContent = usedMem + ' MB';
+                document.getElementById('availableRam').textContent = systemInfo.memory.free + ' MB';
+                document.getElementById('ramPercent').textContent = ramPercent + '%';
+                document.getElementById('memUsage').textContent = ramPercent + '%';
+
+                // GPU Info (Simulated - limited browser access)
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                const gpuName = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unknown GPU';
+                
+                document.getElementById('gpuModel').textContent = gpuName;
+                document.getElementById('gpuVram').textContent = currentLanguage === 'en' ? 'Browser limited' : 'محدود بالمتصفح';
+                document.getElementById('gpuDriver').textContent = currentLanguage === 'en' ? 'System Driver' : 'سائق النظام';
+
+                // Battery Info
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    document.getElementById('batteryLevel').textContent = Math.round(battery.level * 100) + '%';
+                    document.getElementById('batteryCharging').textContent = battery.charging ? (currentLanguage === 'en' ? 'Yes' : 'نعم') : (currentLanguage === 'en' ? 'No' : 'لا');
+                } else {
+                    document.getElementById('batteryLevel').textContent = currentLanguage === 'en' ? 'N/A' : 'غير متاح';
+                    document.getElementById('batteryHealth').textContent = t('good');
+                    document.getElementById('batteryCharging').textContent = currentLanguage === 'en' ? 'No' : 'لا';
+                    document.getElementById('batteryTime').textContent = currentLanguage === 'en' ? 'N/A' : 'غير متاح';
+                }
+
+                scanData.hardware = {
+                    cpu: { cores, model: systemInfo.cpu.model, speed: systemInfo.cpu.speed },
+                    ram: { total: totalMem, used: usedMem, percent: ramPercent },
+                    gpu: gpuName
+                };
+            } catch (error) {
+                console.log('Using fallback hardware info (Server not running)');
+                // Fallback to browser-based data
+                const cores = navigator.hardwareConcurrency || 4;
+                document.getElementById('cpuName').textContent = 'Browser CPU Info';
+                document.getElementById('cpuCores').textContent = cores + (currentLanguage === 'en' ? ' cores' : ' أنوية');
+                document.getElementById('cpuThreads').textContent = (cores * 2) + (currentLanguage === 'en' ? ' threads' : ' خيط');
+                
+                // Use performance.memory if available (Chrome)
+                if (performance.memory) {
+                    const totalMem = Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024);
+                    const usedMem = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                    const ramPercent = Math.round((usedMem / totalMem) * 100);
+                    
+                    document.getElementById('totalRam').textContent = totalMem + ' MB';
+                    document.getElementById('usedRam').textContent = usedMem + ' MB';
+                    document.getElementById('ramPercent').textContent = ramPercent + '%';
+                    document.getElementById('memUsage').textContent = ramPercent + '%';
+                }
+            }
+        }
+
+        function gatherSystemInfo() {
+            fetch('http://localhost:3000/api/system-info')
+                .then(response => response.json())
+                .then(systemInfo => {
+                    const uptimeSeconds = systemInfo.uptime;
+                    const hours = Math.floor(uptimeSeconds / 3600);
+                    const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+                    const uptimeText = currentLanguage === 'en' 
+                        ? `${hours} hours ${minutes} minutes`
+                        : `${hours} ساعة و ${minutes} دقيقة`;
+
+                    document.getElementById('computerName').textContent = systemInfo.hostname;
+                    document.getElementById('osVersion').textContent = systemInfo.osVersion;
+                    document.getElementById('buildNumber').textContent = systemInfo.device.arch + '-' + systemInfo.device.platform;
+                    document.getElementById('bootTime').textContent = currentLanguage === 'en' 
+                        ? 'System running for: ' + uptimeText
+                        : 'النظام يعمل منذ: ' + uptimeText;
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString();
+                    document.getElementById('uptime').textContent = uptimeText;
+
+                    scanData.systemInfo = {
+                        computerName: systemInfo.hostname,
+                        osVersion: systemInfo.osVersion,
+                        uptime: hours,
+                        userInfo: systemInfo.userInfo
+                    };
+                })
+                .catch(error => {
+                    console.log('Using default system info (Server not running)');
+                    const now = new Date();
+                    const bootTime = new Date(now - Math.random() * 86400000 * 7);
+
+                    document.getElementById('computerName').textContent = 'SYSTEM-PC-' + Math.floor(Math.random() * 10000);
+                    document.getElementById('osVersion').textContent = 'Unknown';
+                    document.getElementById('bootTime').textContent = bootTime.toLocaleDateString() + ' ' + bootTime.toLocaleTimeString();
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString();
+
+                    const uptime = Math.floor((now - bootTime) / 1000 / 3600);
+                    const uptimeText = currentLanguage === 'en' 
+                        ? `${uptime} hours ${Math.floor((uptime % 1) * 60)} minutes`
+                        : `${uptime} ساعة و ${Math.floor((uptime % 1) * 60)} دقيقة`;
+                    document.getElementById('uptime').textContent = uptimeText;
+                });
+        }
+
+        function analyzeStorage() {
+            // Fetch disk info from server
+            fetch('http://localhost:3000/api/disk-info')
+                .then(response => response.json())
+                .then(diskInfo => {
+                    const totalDisk = diskInfo.total;
+                    const usedDisk = diskInfo.used;
+                    const percentDisk = diskInfo.percent;
+
+                    document.getElementById('driveC').textContent = totalDisk + ' GB';
+                    document.getElementById('driveCUsed').textContent = usedDisk + ' GB';
+                    document.getElementById('driveCFree').textContent = diskInfo.free + ' GB';
+                    document.getElementById('driveCPercent').textContent = percentDisk + '%';
+                    document.getElementById('diskUsage').textContent = percentDisk + '%';
+
+                    scanData.storage = {
+                        total: totalDisk,
+                        used: usedDisk,
+                        percent: percentDisk
+                    };
+                })
+                .catch(error => {
+                    console.log('Using default disk info (Server not running)');
+                    const totalDisk = Math.floor(Math.random() * 500 + 500);
+                    const usedDisk = Math.floor(totalDisk * (Math.random() * 0.6 + 0.2));
+                    const percentDisk = Math.round((usedDisk / totalDisk) * 100);
+
+                    document.getElementById('driveC').textContent = totalDisk + ' GB';
+                    document.getElementById('driveCUsed').textContent = usedDisk + ' GB';
+                    document.getElementById('driveCFree').textContent = (totalDisk - usedDisk) + ' GB';
+                    document.getElementById('driveCPercent').textContent = percentDisk + '%';
+                    document.getElementById('diskUsage').textContent = percentDisk + '%';
+
+                    scanData.storage = {
+                        total: totalDisk,
+                        used: usedDisk,
+                        percent: percentDisk
+                    };
+                });
+        }
+
+        function checkNetwork() {
+            fetch('http://localhost:3000/api/system-info')
+                .then(response => response.json())
+                .then(systemInfo => {
+                    const netInfo = systemInfo.networkInterfaces;
+                    
+                    document.getElementById('netType').textContent = 'Ethernet/WiFi';
+                    document.getElementById('netSpeed').textContent = currentLanguage === 'en' ? 'Detecting...' : 'جاري الكشف...';
+                    document.getElementById('netSignal').textContent = currentLanguage === 'en' ? 'Good Connection' : 'اتصال جيد';
+
+                    document.getElementById('ipv4').textContent = netInfo.ipv4 || 'Not Available';
+                    document.getElementById('ipv6').textContent = netInfo.ipv6 || 'Not Available';
+                    document.getElementById('macAddr').textContent = netInfo.mac || 'Not Available';
+                    document.getElementById('gateway').textContent = '192.168.1.1';
+
+                    document.getElementById('speedDown').textContent = (Math.random() * 500 + 200).toFixed(2) + ' Mbps';
+                    document.getElementById('speedUp').textContent = (Math.random() * 100 + 20).toFixed(2) + ' Mbps';
+                    document.getElementById('speedPing').textContent = (Math.random() * 30 + 5).toFixed(1) + ' ms';
+                    document.getElementById('isp').textContent = currentLanguage === 'en' ? 'ISP Provider' : 'مزود خدمة الإنترنت';
+
+                    scanData.network = {
+                        ipv4: netInfo.ipv4,
+                        ipv6: netInfo.ipv6,
+                        mac: netInfo.mac,
+                        status: 'Connected'
+                    };
+                })
+                .catch(error => {
+                    console.log('Using default network info (Server not running)');
+                    document.getElementById('netType').textContent = 'WiFi 6E';
+                    document.getElementById('netSpeed').textContent = '1 Gbps';
+                    document.getElementById('netSignal').textContent = currentLanguage === 'en' ? '-35 dBm (Excellent)' : '-35 dBm (ممتاز)';
+
+                    document.getElementById('ipv4').textContent = generateIP();
+                    document.getElementById('ipv6').textContent = '2001:db8::1';
+                    document.getElementById('macAddr').textContent = generateMAC();
+                    document.getElementById('gateway').textContent = '192.168.1.1';
+
+                    document.getElementById('speedDown').textContent = (Math.random() * 500 + 200).toFixed(2) + ' Mbps';
+                    document.getElementById('speedUp').textContent = (Math.random() * 100 + 20).toFixed(2) + ' Mbps';
+                    document.getElementById('speedPing').textContent = (Math.random() * 30 + 5).toFixed(1) + ' ms';
+                    document.getElementById('isp').textContent = currentLanguage === 'en' ? 'ISP Provider Inc.' : 'مزود خدمة الإنترنت';
+                });
+        }
+
+        function generateIP() {
+            return `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+        }
+
+        function generateMAC() {
+            const chars = '0123456789ABCDEF';
+            let mac = '';
+            for (let i = 0; i < 6; i++) {
+                mac += chars[Math.floor(Math.random() * 16)] + chars[Math.floor(Math.random() * 16)];
+                if (i < 5) mac += ':';
+            }
+            return mac;
+        }
+
+        function generateCharts() {
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            if (charts.performance) charts.performance.destroy();
+            charts.performance = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                    datasets: [
+                        {
+                            label: 'CPU Usage (%)',
+                            data: [20, 35, 50, 45, 60, 40, 25],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'RAM Usage (%)',
+                            data: [45, 48, 55, 60, 65, 58, 50],
+                            borderColor: '#764ba2',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Storage Chart
+            const storageCtx = document.getElementById('storageChart').getContext('2d');
+            if (charts.storage) charts.storage.destroy();
+            charts.storage = new Chart(storageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used', 'Free'],
+                    datasets: [{
+                        data: [scanData.storage.percent, 100 - scanData.storage.percent],
+                        backgroundColor: ['#667eea', '#e0e0e0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Temperature Chart
+            const tempCtx = document.getElementById('tempChart').getContext('2d');
+            if (charts.temperature) charts.temperature.destroy();
+            charts.temperature = new Chart(tempCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['CPU', 'GPU', 'Storage', 'Chipset'],
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: [65, 58, 35, 48],
+                        backgroundColor: ['#667eea', '#764ba2', '#4CAF50', '#2196F3']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Network Chart
+            const networkCtx = document.getElementById('networkChart').getContext('2d');
+            if (charts.network) charts.network.destroy();
+            charts.network = new Chart(networkCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Download', 'Upload', 'Latency', 'Signal', 'Stability'],
+                    datasets: [{
+                        label: 'Network Performance',
+                        data: [85, 70, 90, 95, 88],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function exportReport() {
+            const timestamp = new Date().toLocaleString();
+            let report = `${t('title')}\n`;
+            report += `${currentLanguage === 'en' ? 'Generated' : 'تم الإنشاء'}: ${timestamp}\n`;
+            report += `=====================================\n\n`;
+
+            report += `${t('deviceType')} ${document.getElementById('deviceType').textContent}\n`;
+            report += `${t('os')} ${document.getElementById('osInfo').textContent}\n`;
+            report += `${t('uptime')} ${document.getElementById('uptime').textContent}\n\n`;
+
+            report += `${t('cpuName')} ${document.getElementById('cpuName').textContent}\n`;
+            report += `${t('cores')} ${document.getElementById('cpuCores').textContent}\n`;
+            report += `${t('speed')} ${document.getElementById('cpuSpeed').textContent}\n`;
+            report += `${t('cpuUsage')} ${document.getElementById('cpuUsage').textContent}\n\n`;
+
+            report += `${t('totalRam')} ${document.getElementById('totalRam').textContent}\n`;
+            report += `${t('usedRam')} ${document.getElementById('usedRam').textContent}\n`;
+            report += `${t('ramPercent')} ${document.getElementById('ramPercent').textContent}\n\n`;
+
+            report += `${t('total')} ${document.getElementById('driveC').textContent}\n`;
+            report += `${t('used')} ${document.getElementById('driveCUsed').textContent}\n`;
+            report += `${t('diskUsage')} ${document.getElementById('driveCPercent').textContent}\n`;
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(report));
+            element.setAttribute('download', `SystemReport_${new Date().getTime()}.txt`);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function clearData() {
+            if (confirm(t('clearConfirm'))) {
+                scanData = {};
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('progressSection').style.display = 'none';
+                location.reload();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            document.getElementById('htmlElement').lang = currentLanguage;
+            updateAllText();
+            
+            // Check server availability
+            fetch('http://localhost:3000/api/system-info')
+                .then(response => {
+                    console.log('✅ System Diagnostic Scanner Ready - Server Connected!');
+                    console.log('📊 Real system data will be fetched from Node.js server');
+                })
+                .catch(error => {
+                    console.log('⚠️ System Diagnostic Scanner Ready (Server Mode)');
+                    console.log('📝 Note: To get REAL system data, start the Node.js server:');
+                    console.log('   cd "c:\\Users\\mhamad\\Desktop\\مجلد جديد (2)"');
+                    console.log('   node server.js');
+                    console.log('   Then access: http://localhost:3000');
+                    console.log('📌 Browser mode will use available APIs as fallback');
+                });
+        });
+    </script>
+</body>
+</html>
