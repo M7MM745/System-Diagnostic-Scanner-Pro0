@@ -13,5 +13,8 @@
     "scanner"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "systeminformation": "^5.31.6"
+  }
 }
