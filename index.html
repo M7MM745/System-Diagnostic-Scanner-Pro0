@@ -1259,7 +1259,7 @@
 
         function analyzeStorage() {
             // Fetch disk info from server
-            fetch('http://localhost:3000/api/disk-info')
+            fetch('/api/system-info')
                 .then(response => response.json())
                 .then(diskInfo => {
                     const totalDisk = diskInfo.total;
