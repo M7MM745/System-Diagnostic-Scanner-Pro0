@@ -3,7 +3,8 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+// استخدام المنفذ المخصص من Render أو المنفذ 3000 كاحتياطي
+const PORT = process.env.PORT || 3000;
 
 function getSystemInfo() {
     const cpus = os.cpus();
@@ -11,7 +12,6 @@ function getSystemInfo() {
     const freeMemory = os.freemem();
     const usedMemory = totalMemory - freeMemory;
     
-    // CPU usage calculation
     let cpuUsage = 0;
     if (process.cpuUsage) {
         const usage = process.cpuUsage();
@@ -65,13 +65,12 @@ function getNetworkInfo() {
     return networkInfo;
 }
 
-function getDiskSpace(diskPath = 'C:') {
-    // Simple disk space estimation for Windows
+function getDiskSpace() {
     try {
         const stats = {
-            total: 1000 * 1024 * 1024 * 1024, // 1TB default estimate
-            used: 500 * 1024 * 1024 * 1024,   // 500GB used estimate
-            free: 500 * 1024 * 1024 * 1024    // 500GB free estimate
+            total: 1000 * 1024 * 1024 * 1024, 
+            used: 500 * 1024 * 1024 * 1024,   
+            free: 500 * 1024 * 1024 * 1024    
         };
         return {
             total: Math.round(stats.total / 1024 / 1024 / 1024),
@@ -85,7 +84,6 @@ function getDiskSpace(diskPath = 'C:') {
 }
 
 function getProcesses() {
-    // Return current process info
     return {
         current: {
             name: 'Node.js Server',
@@ -97,26 +95,25 @@ function getProcesses() {
 
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'application/json');
     
     if (req.url === '/api/system-info') {
-        const info = getSystemInfo();
+        res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
-        res.end(JSON.stringify(info));
+        res.end(JSON.stringify(getSystemInfo()));
     } 
     else if (req.url === '/api/disk-info') {
-        const diskInfo = getDiskSpace();
+        res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
-        res.end(JSON.stringify(diskInfo));
+        res.end(JSON.stringify(getDiskSpace()));
     }
     else if (req.url === '/api/processes') {
-        const processes = getProcesses();
+        res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
-        res.end(JSON.stringify(processes));
+        res.end(JSON.stringify(getProcesses()));
     }
     else if (req.url === '/') {
-        // Serve the HTML file
-        const htmlPath = path.join(__dirname, 'تست.html');
+        // تم تصحيح المسار ليعمل مع ملف index.html المرفوع
+        const htmlPath = path.join(__dirname, 'index.html');
         fs.readFile(htmlPath, (err, data) => {
             if (err) {
                 res.writeHead(404);
@@ -129,15 +126,12 @@ const server = http.createServer((req, res) => {
         });
     }
     else {
+        res.setHeader('Content-Type', 'application/json');
         res.writeHead(404);
         res.end(JSON.stringify({ error: 'Not found' }));
     }
 });
 
 server.listen(PORT, () => {
-    console.log(`✅ System Diagnostic Server running on http://localhost:${PORT}`);
-    console.log(`📊 API endpoints:`);
-    console.log(`   http://localhost:${PORT}/api/system-info`);
-    console.log(`   http://localhost:${PORT}/api/disk-info`);
-    console.log(`   http://localhost:${PORT}/api/processes`);
+    console.log(`✅ System Diagnostic Server running on port ${PORT}`);
 });
